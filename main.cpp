@@ -1,178 +1,282 @@
 //
 //  main.cpp
-//  InfixTopost
+//  Binary_search_tree
 //
-//  Created by raghav babbar on 16/01/17.
+//  Created by raghav babbar on 26/01/17.
 //  Copyright © 2017 raghav babbar. All rights reserved.
+//
 
 #include <iostream>
 #include <stack>
-using namespace  std;
-char getBracket(char c)
-{if(c==']')
-    return '[';
-else if(c=='}')
-    return '{';
-    return '(';
-    
-}
-bool isOPerator(char c)
-{
-    return ((c=='+'||c=='-'||c=='/'||c=='*')?true:false);
-    
-}
-bool isOPerand(char c)
-{return (((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='1'&&c<='9')||(c=='0'))?true:false);
-}
-int getW8(char c)
-{if(c=='+'||c=='-')
-    return 0;
-else return 1;
-}
-int compare(char a, char b)
-{int aa=getW8(a);
-    int bb=getW8(b);
-    return (aa>=bb)?true:false;
-}
-
-bool isBracket(char c)
-{
-    return (c=='('||c=='['||c=='{'||c=='}'||c==']'||c==')')?true:false;
-}
-string infixToPostfix(string str)
-{
-    string r="";
-    stack <char> stk;
-    
-    
-    for(int i=0;str[i]!='\0';i++)
-    {
-        if(isOPerand(str[i]))
-        {  // cout<<"\n pushing operand ===>"<<str[i];
-            r+=str[i];
-        }
-        else if(isOPerator(str[i]))
-        {
-            while(1)
-            {
-                if(!stk.empty()&&!(isBracket(stk.top()))&&compare(stk.top(), str[i]))
-                {r+=stk.top();
-                    stk.pop();
-                }
-                else break;
-            }
-            stk.push(str[i]);
-        }
-        
-        else if(isBracket(str[i]))
-        {
-            if(str[i]=='['||str[i]=='{'||str[i]=='(')
-            {stk.push(str[i]);
-                // cout<<"\n pusing  bracket "<<str[i];
-                
-            } else
-            {char b=getBracket(str[i]);
-                //   cout<<b<<"\n";
-                
-                while(true)
-                {if(stk.top()==b)
-                {
-                    stk.pop();
-                    break;
-                    }
-                    r+=stk.top();
-                    stk.pop();
-                    }
-                    }
-                    }
-                    }
-    
-    while (!stk.empty())
-    {
-        r+=stk.top();
-        stk.pop();
-    }
-    
-    return r;
-
-}/////////
-/////
-///////////upper function are for converting the expression into postfix notation.
-////
-////////
+using namespace std;
 typedef struct node
-{
-    char d;
-    node *left;
+{int data;
     node *right;
-
+    node *left;
+    node *parent;
 }node;
-node* make_node(char c)
-{node*ptr=(node*)malloc(sizeof(node));
-    ptr->d=c;
-    ptr->right=ptr->left=NULL;
-return ptr;
+class BinarySearchTree
+{node *root;
+    node *array[2];
+public:
+  BinarySearchTree()
+    {
+     root=NULL;
+     array[0]=array[1]=NULL;
+    }
+    bool isEmpty()
+    {return root==NULL;
+    }
+    
+    void createRootNode(int d);
+    void inOrder(){inOrdertrans(root);};
+    void inOrdertrans(node *r);
+    void postOrder(){postOrdertrans(root);};
+    void postOrdertrans(node *r);
+    void preOrder(){preOrdertrans(root);};
+    void preOrdertrans(node *r);
+    void insert(int d);
+    void insertnode(int d,node *n);
+    void remove(int);
+    int  totalnode() ;
+    int  num_internal_node(node *r);
+    int  internalnode(){return num_internal_node(root);}
+    int  leafNode(){ return num_leaf_node(root);};
+    int  num_leaf_node(node *n);
+    node* create(int d);
+    node *find(int d,node *r);
+    bool isLeaf(node* );
+    bool hasOneChild(node *);
+    bool hasTwoChild(node *);
+    node *find_minimum(node *);
+};
+node * BinarySearchTree::find_minimum(node* rot )
+{   node *r=rot;
+    node *ptr;
+    int min=rot->data;
+    stack<node *> stk;
+    stk.push(rot);
+    while (!stk.empty())
+    {if(stk.top()->data<min)
+    {min=stk.top()->data;
+        r=stk.top();
+    }
+        ptr=stk.top();
+        stk.pop();
+        if(ptr->right)
+            stk.push(ptr->right);
+        if(ptr->left)
+            stk.push(ptr->left);
+    }
+  return r;
 }
-node * expressionTree(string str)
+node * BinarySearchTree:: find(int d,node *r)
+{if(r)
 {
-node *r,*l;
-    stack<node*> stk;
-    for(int i=0;str[i]!='\0';i++)
-    {node *p;
-        if(isOPerand(str[i]))
-        {    p=make_node(str[i]);
-            stk.push(p);
-        }
-        else
-        {p=make_node(str[i]);
-            l=stk.top();
-            stk.pop();
-            r=stk.top();
-            stk.pop();
-            p->left=l;
-            p->right=r;
-            stk.push(p);
-        }
+if(d>(r->data))
+    return (find(d,r->right));
+else if(d<(r->data))
+    return (find(d,r->left));
+else if(d==(r->data))
+{
+   return  r;
     
+}
+}
+return NULL;
+}
+bool BinarySearchTree::hasTwoChild(node * r)
+{if(r->left&&r->right)
+    return true;
+else return false;
+}
+bool BinarySearchTree::isLeaf( node *r)
+{
+if(r->right||r->left)
+    return false;
+else return true;
+}
+bool BinarySearchTree::hasOneChild(node *r)
+{
+if((r->left&&!r->right)||(!r->left&&r->right))
+    return true;
     
+else return  true;
+
+}
+
+void BinarySearchTree::remove(int d)
+{node *m=find(d,root);
+   node*ptr=NULL;
+abc:
+   if(m)
+ {
+  if(isLeaf(m))
+  {
+  ptr=m->parent;
+  if(ptr->left==m)
+  {ptr->left=NULL;
+  }
+  else
+  {ptr->right=NULL;
+  }
+      
+  }
+else if (hasOneChild(m))
+{
+ptr=m->parent;
+if(ptr->left==m)
+{
+if(m->left)
+    ptr->left=m->left;
+else
+    ptr->left=m->right;
+}
+else
+{
+    if(m->left)
+        ptr->right=m->left;
+    else
+        ptr->right=m->right;
+}
+}
+ else if (hasTwoChild(m))
+ {
+     node *right_small_node=find_minimum(m->right);
+     cout<<"\n iminmum is= "<<right_small_node->data;
+     m->data=right_small_node->data;
+     m=find(right_small_node->data, m->right);
+     goto abc;
+ }
+ }
+ else cout<<"elemnt not found";
+}
+void BinarySearchTree::insert(int d)
+{if(root)
+    insertnode(d,root);
+else
+    createRootNode(d);
+}
+
+void BinarySearchTree::insertnode(int d,node *r)
+{if(d>r->data)
+{if(r->right)
+     insertnode(d,r->right);
+else {r->right=create(d);
+    r->right->parent=r;}
+}
+else
+{
+if(r->left)
+    insertnode(d, r->left);
+else{ r->left=create(d);
+    r->left->parent=r;}
+}
+}
+void BinarySearchTree::createRootNode(int d)
+{
+root=create(d);
+    root->parent=NULL;
+}
+node*BinarySearchTree::create(int d)
+{
+    node  *ptr=(node*)malloc(sizeof(node));
+    ptr->left=ptr->right=ptr->parent=NULL;
+    ptr->data=d;
+    return ptr;
+}
+
+int BinarySearchTree::totalnode()
+{
+    return (num_leaf_node(root)+num_internal_node(root));
+}
+int BinarySearchTree::num_internal_node(node *r)
+{if(r)
+{
+   if(!r->left&&!r->right)
+    return 0;
+  else
+    return (num_internal_node(r->right)+num_internal_node(r->left)+1);
+}
+else return 0;
+}
+int BinarySearchTree::num_leaf_node(node *r)
+{if(r)
+{
+ if(!r->left&&!r->right)
+    return (num_leaf_node(r->right)+num_leaf_node(r->left)+1);
+else
+    return (num_leaf_node(r->right)+num_leaf_node(r->left)+0);
+
+}
+else return 0;
+}
+
+void BinarySearchTree::inOrdertrans( node *r)
+{if(r)
+{
+    inOrdertrans(r->left);
+    cout<<" "<<r->data
+    ;
+    inOrdertrans(r->right);
+    
+}
+}
+void BinarySearchTree::preOrdertrans(node *r)
+{
+ if(r)
+ {
+     cout<<" "<<r->data;
+     preOrdertrans(r->left);
+     preOrdertrans(r->right);
+ }
+}
+void BinarySearchTree::postOrdertrans(node *r)
+{
+    if(r)
+    {postOrdertrans(r->left);
+    postOrdertrans(r->right);
+    cout<<" "<<r->data;
+        
     
     }
-    return stk.top();
-}
-void infixNotation(node *root)
-{
-if(root)
-{infixNotation(root->left);
-cout<<" "<<root->d;
-infixNotation(root->right);
-
-}
-
-}
-void preFix(node *root)
-{
-if(root)
-{cout<<" "<<root->d;
-    preFix(root->left);
-    preFix(root->right);
-
-
-}
 }
 int main()
-{
-    node * root_node_of_expression_tree;
-    string s;
-    cin>>s;
-    string postFixstr=infixToPostfix(s);
-    cout<<"\nInfix to POSTFIX_NOTATION="<<postFixstr;
-    root_node_of_expression_tree=expressionTree(postFixstr);
-    cout<<"\n PREFIX_NOTATION";
-    preFix(root_node_of_expression_tree);
-    cout<<"\n INFIX_NOTATION";
-    infixNotation(root_node_of_expression_tree);
-
+{int t,elemt;
+ cout<<"\n 0.insert a elemnet in a tree";
+ cout<<"\n 1.Preorder transversal";
+ cout<<"\n 2.Inorder transversal";
+ cout<<"\n 3.Postorder transversal";
+ cout<<"\n 4.number of leaft node";
+ cout<<"\n 5.number of internal node";
+ cout<<"\n 6.total node";
+ cout<<"\n 7.delete the element";
+ cout<<"\n 9.to exit";
+    BinarySearchTree tree;
+    while (1) {
+        cout<<"\n enter the choice";
+        cin>>t;
+        switch (t) {
+            case 0:cout<<"\n enter the element";
+                cin>>elemt;
+              
+                tree.insert(elemt);
+                break;
+            case 1:cout<<"\n[ ";tree.preOrder();cout<<" ]"; break;
+            case 2:cout<<"\n[ ";tree.inOrder();cout<<" ]";break;
+            case 3:cout<<"\n[ ";tree.postOrder();     cout<<" ]"; break;
+            case 4:cout<<"\n leaf node="<<tree.leafNode(); break;
+            case 5:cout<<"\n internal node="<<tree.internalnode();break;
+            case 6:cout<<"\n total node="<<tree.totalnode();
+                break;
+            case 7:cout<<"\n enter the element to delete"; cin>>elemt;tree.remove(elemt);
+                break;
+            default: exit(0);
+                break;
+        }
     
     
-    return 0;
+    }
+    
+       return 0;
 }
