@@ -1,282 +1,70 @@
 //
 //  main.cpp
-//  Binary_search_tree
+//  level-Order_transversal
 //
-//  Created by raghav babbar on 26/01/17.
+//  Created by raghav babbar on 01/02/17.
 //  Copyright © 2017 raghav babbar. All rights reserved.
 //
 
 #include <iostream>
-#include <stack>
+#include <queue>
 using namespace std;
-typedef struct node
-{int data;
-    node *right;
+ typedef struct node
+{node *right;
     node *left;
-    node *parent;
+    int data;
 }node;
-class BinarySearchTree
-{node *root;
-    node *array[2];
-public:
-  BinarySearchTree()
-    {
-     root=NULL;
-     array[0]=array[1]=NULL;
-    }
-    bool isEmpty()
-    {return root==NULL;
-    }
-    
-    void createRootNode(int d);
-    void inOrder(){inOrdertrans(root);};
-    void inOrdertrans(node *r);
-    void postOrder(){postOrdertrans(root);};
-    void postOrdertrans(node *r);
-    void preOrder(){preOrdertrans(root);};
-    void preOrdertrans(node *r);
-    void insert(int d);
-    void insertnode(int d,node *n);
-    void remove(int);
-    int  totalnode() ;
-    int  num_internal_node(node *r);
-    int  internalnode(){return num_internal_node(root);}
-    int  leafNode(){ return num_leaf_node(root);};
-    int  num_leaf_node(node *n);
-    node* create(int d);
-    node *find(int d,node *r);
-    bool isLeaf(node* );
-    bool hasOneChild(node *);
-    bool hasTwoChild(node *);
-    node *find_minimum(node *);
-};
-node * BinarySearchTree::find_minimum(node* rot )
-{   node *r=rot;
-    node *ptr;
-    int min=rot->data;
-    stack<node *> stk;
-    stk.push(rot);
-    while (!stk.empty())
-    {if(stk.top()->data<min)
-    {min=stk.top()->data;
-        r=stk.top();
-    }
-        ptr=stk.top();
-        stk.pop();
-        if(ptr->right)
-            stk.push(ptr->right);
-        if(ptr->left)
-            stk.push(ptr->left);
-    }
-  return r;
-}
-node * BinarySearchTree:: find(int d,node *r)
-{if(r)
-{
-if(d>(r->data))
-    return (find(d,r->right));
-else if(d<(r->data))
-    return (find(d,r->left));
-else if(d==(r->data))
-{
-   return  r;
+node* create(int d)
+{node *ptr=new node;
+    ptr->data=d;
+    ptr->left=ptr->right=NULL;
+    return ptr;
     
 }
-}
-return NULL;
-}
-bool BinarySearchTree::hasTwoChild(node * r)
-{if(r->left&&r->right)
-    return true;
-else return false;
-}
-bool BinarySearchTree::isLeaf( node *r)
-{
-if(r->right||r->left)
-    return false;
-else return true;
-}
-bool BinarySearchTree::hasOneChild(node *r)
-{
-if((r->left&&!r->right)||(!r->left&&r->right))
-    return true;
-    
-else return  true;
-
-}
-
-void BinarySearchTree::remove(int d)
-{node *m=find(d,root);
-   node*ptr=NULL;
-abc:
-   if(m)
- {
-  if(isLeaf(m))
-  {
-  ptr=m->parent;
-  if(ptr->left==m)
-  {ptr->left=NULL;
-  }
-  else
-  {ptr->right=NULL;
-  }
-      
-  }
-else if (hasOneChild(m))
-{
-ptr=m->parent;
-if(ptr->left==m)
-{
-if(m->left)
-    ptr->left=m->left;
-else
-    ptr->left=m->right;
-}
-else
-{
-    if(m->left)
-        ptr->right=m->left;
-    else
-        ptr->right=m->right;
-}
-}
- else if (hasTwoChild(m))
- {
-     node *right_small_node=find_minimum(m->right);
-     cout<<"\n iminmum is= "<<right_small_node->data;
-     m->data=right_small_node->data;
-     m=find(right_small_node->data, m->right);
-     goto abc;
- }
- }
- else cout<<"elemnt not found";
-}
-void BinarySearchTree::insert(int d)
-{if(root)
-    insertnode(d,root);
-else
-    createRootNode(d);
-}
-
-void BinarySearchTree::insertnode(int d,node *r)
+void insertnode(int d,node *r)
 {if(d>r->data)
 {if(r->right)
-     insertnode(d,r->right);
+    insertnode(d,r->right);
 else {r->right=create(d);
-    r->right->parent=r;}
+    }
 }
 else
 {
-if(r->left)
-    insertnode(d, r->left);
-else{ r->left=create(d);
-    r->left->parent=r;}
+    if(r->left)
+        insertnode(d, r->left);
+    else{ r->left=create(d);
+        }
 }
 }
-void BinarySearchTree::createRootNode(int d)
+void printLevelOrder(node *r)
 {
-root=create(d);
-    root->parent=NULL;
-}
-node*BinarySearchTree::create(int d)
-{
-    node  *ptr=(node*)malloc(sizeof(node));
-    ptr->left=ptr->right=ptr->parent=NULL;
-    ptr->data=d;
-    return ptr;
-}
-
-int BinarySearchTree::totalnode()
-{
-    return (num_leaf_node(root)+num_internal_node(root));
-}
-int BinarySearchTree::num_internal_node(node *r)
-{if(r)
-{
-   if(!r->left&&!r->right)
-    return 0;
-  else
-    return (num_internal_node(r->right)+num_internal_node(r->left)+1);
-}
-else return 0;
-}
-int BinarySearchTree::num_leaf_node(node *r)
-{if(r)
-{
- if(!r->left&&!r->right)
-    return (num_leaf_node(r->right)+num_leaf_node(r->left)+1);
-else
-    return (num_leaf_node(r->right)+num_leaf_node(r->left)+0);
-
-}
-else return 0;
-}
-
-void BinarySearchTree::inOrdertrans( node *r)
-{if(r)
-{
-    inOrdertrans(r->left);
-    cout<<" "<<r->data
-    ;
-    inOrdertrans(r->right);
-    
-}
-}
-void BinarySearchTree::preOrdertrans(node *r)
-{
- if(r)
- {
-     cout<<" "<<r->data;
-     preOrdertrans(r->left);
-     preOrdertrans(r->right);
- }
-}
-void BinarySearchTree::postOrdertrans(node *r)
-{
-    if(r)
-    {postOrdertrans(r->left);
-    postOrdertrans(r->right);
-    cout<<" "<<r->data;
+    queue<node*> q;
+    q.push(r);
+    while(!q.empty())
+    {node *ptr=q.front();
         
+        cout<<" "<<ptr->data;
+        q.pop();
+        if(ptr->left)
+            q.push(ptr->left);
+        if(ptr->right)
+            q.push(ptr->right);
+            
     
     }
 }
 int main()
-{int t,elemt;
- cout<<"\n 0.insert a elemnet in a tree";
- cout<<"\n 1.Preorder transversal";
- cout<<"\n 2.Inorder transversal";
- cout<<"\n 3.Postorder transversal";
- cout<<"\n 4.number of leaft node";
- cout<<"\n 5.number of internal node";
- cout<<"\n 6.total node";
- cout<<"\n 7.delete the element";
- cout<<"\n 9.to exit";
-    BinarySearchTree tree;
-    while (1) {
-        cout<<"\n enter the choice";
-        cin>>t;
-        switch (t) {
-            case 0:cout<<"\n enter the element";
-                cin>>elemt;
-              
-                tree.insert(elemt);
-                break;
-            case 1:cout<<"\n[ ";tree.preOrder();cout<<" ]"; break;
-            case 2:cout<<"\n[ ";tree.inOrder();cout<<" ]";break;
-            case 3:cout<<"\n[ ";tree.postOrder();     cout<<" ]"; break;
-            case 4:cout<<"\n leaf node="<<tree.leafNode(); break;
-            case 5:cout<<"\n internal node="<<tree.internalnode();break;
-            case 6:cout<<"\n total node="<<tree.totalnode();
-                break;
-            case 7:cout<<"\n enter the element to delete"; cin>>elemt;tree.remove(elemt);
-                break;
-            default: exit(0);
-                break;
-        }
-    
-    
+{
+    int d;
+    cout<<"\n enter the element in the tree press 0 to discontinue";
+    cin>>d;
+    node *root=create(d);
+    while(true)
+    {cin>>d;
+        if(d==0) break;
+        insertnode(d, root);
     }
     
-       return 0;
+  cout<<"LEVEL Order transversal ";  printLevelOrder(root);
+    return 0;
 }
